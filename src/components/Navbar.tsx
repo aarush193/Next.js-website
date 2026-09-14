@@ -7,54 +7,72 @@ import { Menu, X } from "lucide-react";
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isVisible, setIsVisible] = useState(true);
 
+  const headerRef = useRef<HTMLElement | null>(null);
+  const currentTranslateYRef = useRef(0);
+  const lastScrollYRef = useRef(0);
   const isScrolledRef = useRef(false);
-  const isVisibleRef = useRef(true);
+  const isOpenRef = useRef(false);
+
+  // Keep isOpenRef in sync with isOpen state
+  useEffect(() => {
+    isOpenRef.current = isOpen;
+    if (isOpen && headerRef.current) {
+      currentTranslateYRef.current = 0;
+      headerRef.current.style.transform = "translate3d(0, 0px, 0)";
+    }
+  }, [isOpen]);
 
   useEffect(() => {
-    let lastScrollY = window.scrollY;
+    lastScrollYRef.current = window.scrollY;
     let ticking = false;
+
+    const updateNavbar = () => {
+      const currentScrollY = window.scrollY;
+      const lastScrollY = lastScrollYRef.current;
+      const delta = currentScrollY - lastScrollY;
+
+      // Update background and border styling threshold
+      const shouldBeScrolled = currentScrollY > 20;
+      if (shouldBeScrolled !== isScrolledRef.current) {
+        isScrolledRef.current = shouldBeScrolled;
+        setIsScrolled(shouldBeScrolled);
+      }
+
+      // If mobile menu is open, keep navbar pinned at the top
+      if (isOpenRef.current) {
+        lastScrollYRef.current = currentScrollY;
+        ticking = false;
+        return;
+      }
+
+      const header = headerRef.current;
+      if (header) {
+        const headerHeight = header.offsetHeight || 80;
+
+        if (currentScrollY <= 0) {
+          // Always fully visible at the top of the page
+          currentTranslateYRef.current = 0;
+          header.style.transform = "translate3d(0, 0px, 0)";
+        } else {
+          // Slowly move up on scroll down, slowly move down on scroll up
+          // Bounded strictly between -headerHeight (hidden) and 0 (fully visible)
+          let newTranslateY = currentTranslateYRef.current - delta;
+          if (newTranslateY < -headerHeight) newTranslateY = -headerHeight;
+          if (newTranslateY > 0) newTranslateY = 0;
+
+          currentTranslateYRef.current = newTranslateY;
+          header.style.transform = `translate3d(0, ${newTranslateY}px, 0)`;
+        }
+      }
+
+      lastScrollYRef.current = currentScrollY;
+      ticking = false;
+    };
 
     const handleScroll = () => {
       if (!ticking) {
-        window.requestAnimationFrame(() => {
-          const currentScrollY = window.scrollY;
-
-          // Always visible near top of the page
-          if (currentScrollY <= 50) {
-            if (!isVisibleRef.current) {
-              isVisibleRef.current = true;
-              setIsVisible(true);
-            }
-            if (isScrolledRef.current) {
-              isScrolledRef.current = false;
-              setIsScrolled(false);
-            }
-          } else {
-            if (!isScrolledRef.current) {
-              isScrolledRef.current = true;
-              setIsScrolled(true);
-            }
-
-            // If scrolling UP: reveal navbar. If scrolling DOWN: hide navbar.
-            const scrollDelta = currentScrollY - lastScrollY;
-            if (scrollDelta < -10) {
-              if (!isVisibleRef.current) {
-                isVisibleRef.current = true;
-                setIsVisible(true);
-              }
-            } else if (scrollDelta > 10 && currentScrollY > 100) {
-              if (isVisibleRef.current) {
-                isVisibleRef.current = false;
-                setIsVisible(false);
-              }
-            }
-          }
-
-          lastScrollY = currentScrollY;
-          ticking = false;
-        });
+        window.requestAnimationFrame(updateNavbar);
         ticking = true;
       }
     };
@@ -74,9 +92,9 @@ export default function Navbar() {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transform-gpu will-change-transform border-b py-3.5 sm:py-4 transition-[transform,background-color,border-color,box-shadow] duration-250 ease-out ${
-        isVisible || isOpen ? "translate-y-0" : "-translate-y-full"
-      } ${
+      ref={headerRef}
+      style={{ transform: "translate3d(0, 0px, 0)" }}
+      className={`fixed top-0 left-0 right-0 z-50 transform-gpu will-change-transform border-b py-3.5 sm:py-4 transition-[background-color,border-color,box-shadow] duration-200 ${
         isScrolled
           ? "bg-[#FAF8F5]/98 shadow-xs border-[#658A77]/40"
           : "bg-[#FAF8F5] border-[#658A77]/25"
