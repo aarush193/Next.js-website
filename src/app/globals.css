@@ -1,0 +1,112 @@
+@import "tailwindcss";
+
+:root {
+  --bg-primary: #FAF8F5;
+  --bg-surface: #F3EFEA;
+  --bg-surface-elevated: #ECE6DD;
+  --text-primary: #1F2421;
+  --text-secondary: #4A5550;
+  --text-muted: #6E7B74;
+  --brand-forest: #284338;
+  --brand-forest-hover: #1E342B;
+  --brand-sage: #8FA698;
+  --brand-sage-light: #E1E8E3;
+  --brand-terracotta: #658A77;
+  --brand-terracotta-hover: #4E6F5F;
+  --border-light: rgba(40, 67, 56, 0.12);
+  --border-subtle: rgba(40, 67, 56, 0.06);
+}
+
+@theme {
+  --font-serif: var(--font-serif), "Cormorant Garamond", Georgia, serif;
+  --font-sans: var(--font-sans), "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  --font-script: var(--font-script), "PrintedMoments", cursive, sans-serif;
+  
+  --color-ivory: #FAF8F5;
+  --color-sand: #F3EFEA;
+  --color-sand-elevated: #ECE6DD;
+  --color-forest: #284338;
+  --color-forest-hover: #1E342B;
+  --color-sage: #8FA698;
+  --color-sage-light: #E1E8E3;
+  --color-terracotta: #658A77;
+  --color-terracotta-hover: #4E6F5F;
+  --color-charcoal: #1F2421;
+  --color-slate-muted: #4A5550;
+}
+
+@font-face {
+  font-family: 'PrintedMoments';
+  src: url('/fonts/printedmoments.woff') format('woff');
+  font-weight: 300 400 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+.font-script {
+  font-family: var(--font-script), 'PrintedMoments', cursive, sans-serif;
+  font-style: normal;
+  -webkit-text-stroke: 0.35px currentColor;
+  text-rendering: optimizeLegibility;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans), sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+::selection {
+  background-color: #8FA698;
+  color: #FAF8F5;
+}
+
+
+/* Subtle, bespoke scrollbar matching the serene palette */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #FAF8F5;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(40, 67, 56, 0.2);
+  border-radius: 9999px;
+  border: 2px solid #FAF8F5;
+}
+
+/* FAQ Accordion Transitions */
+.faq-answer-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  pointer-events: none;
+  transition: grid-template-rows 300ms cubic-bezier(0, 0, 0.2, 1), opacity 260ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.faq-answer-panel[data-open="true"] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.faq-chevron {
+  transition: transform 300ms cubic-bezier(0, 0, 0.2, 1), background-color 300ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .faq-answer-panel,
+  .faq-chevron {
+    transition: none !important;
+  }
+}
